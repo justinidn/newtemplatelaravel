@@ -5,26 +5,21 @@
     </div>
     <div class="dialog-body">
         <form id="departmentsForm" @submit.prevent="submitForm()">
-            <div class="mb-3">
-                <x-form.input name="department_name" label="Nama Department" x-model="form.department_name" x-bind:class="{ 'is-invalid': errors.department_name }" required />
-                <template x-if="errors.department_name">
-                    <div class="invalid-feedback d-block" x-text="errors.department_name"></div>
-                </template>
-            </div>
-            <div class="mb-3">
-                <x-form.input name="department_alias" label="Alias" x-model="form.department_alias" x-bind:class="{ 'is-invalid': errors.department_alias }" required />
-                <template x-if="errors.department_alias">
-                    <div class="invalid-feedback d-block" x-text="errors.department_alias"></div>
-                </template>
-            </div>
-
+            <x-form.input name="department_name" label="Nama Department" x-model="form.department_name" required />
+            <template x-if="errors.department_name">
+                <div class="invalid-feedback d-block" x-text="errors.department_name"></div>
+            </template>
+            <x-form.input name="department_alias" label="Alias Department" x-model="form.department_alias" required />
+            <template x-if="errors.department_alias">
+                <div class="invalid-feedback d-block" x-text="errors.department_alias"></div>
+            </template>
             <div class="mb-3" x-show="isEdit">
                 <label class="form-label">Status</label>
                 <div class="form-field">
                     <div class="switch" style="--bs-switch-width: 2.75rem; --bs-switch-indicator-width: 1.5rem;">
-                        <input type="checkbox" value="1" id="switchActiveDepartment" role="switch" switch x-model="form.is_active">
+                        <input type="checkbox" value="1" id="switchActiveUser" role="switch" switch x-model="form.is_active">
                     </div>
-                    <label for="switchActiveDepartment">Active</label>
+                    <label for="switchActiveUser">Active</label>
                 </div>
             </div>
         </form>
@@ -37,8 +32,8 @@
 </dialog>
 
 <style>
-    #departmentsForm input[x-model][aria-invalid="true"],
-    #departmentsForm select[x-model][aria-invalid="true"] {
+    #departmentsForm [x-model][aria-invalid="true"],
+    #departmentsForm .is-invalid [x-model] {
         border-color: var(--bs-danger);
     }
 </style>
@@ -51,7 +46,6 @@
             form: {
                 id: '',
                 department_name: '',
-                department_alias: '',
                 is_active: true
             },
             errors: {},
@@ -66,6 +60,7 @@
                 };
                 this.originalForm = {};
                 this.errors = {};
+                this.clearValidationAttributes();
                 document.getElementById('departmentsModal').showModal();
             },
 
@@ -81,11 +76,21 @@
                     ...this.form
                 };
                 this.errors = {};
+                this.clearValidationAttributes();
                 document.getElementById('departmentsModal').showModal();
+            },
+
+            clearValidationAttributes() {
+                this.$nextTick(() => {
+                    document.querySelectorAll('#departmentsForm [x-model]').forEach(el => {
+                        el.removeAttribute('aria-invalid');
+                    });
+                });
             },
 
             submitForm() {
                 this.errors = {};
+                this.clearValidationAttributes();
 
                 const formData = {
                     ...this.form
@@ -102,7 +107,7 @@
                 request
                     .then(response => {
                         document.getElementById('departmentsModal').close();
-                        window.dispatchEvent(new CustomEvent('department-saved'));
+                        window.dispatchEvent(new CustomEvent('departments-saved'));
                         alert(response.data.message || 'Data berhasil disimpan.');
                     })
                     .catch(error => {
@@ -114,8 +119,9 @@
                                 }
                                 this.$nextTick(() => {
                                     document.querySelectorAll('#departmentsForm [x-model]').forEach(el => {
-                                        const field = el.getAttribute('x-model').split('.').pop();
-                                        if (this.errors[field]) {
+                                        const modelAttr = el.getAttribute('x-model');
+                                        const field = modelAttr ? modelAttr.split('.').pop() : null;
+                                        if (field && this.errors[field]) {
                                             el.setAttribute('aria-invalid', 'true');
                                         } else {
                                             el.removeAttribute('aria-invalid');

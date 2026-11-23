@@ -18,7 +18,7 @@
     <hr>
 
     <div x-data="departmentPage">
-        <x-table-data name="departmentsList" endpoint="{{ route('departments.index') }}" :pagination="true" :refreshEvents="['department-saved']">
+        <x-table-data name="departmentsList" endpoint="{{ route('departments.index') }}" :pagination="true" :refreshEvents="['departments-saved']">
 
             {{-- Slot: langsung input search + tombol filter (sesuai komponen x-table-data terbaru) --}}
             <label class="form-control form-control-sm form-adorn flex-grow-1 mb-0">
@@ -115,7 +115,7 @@
                     if (confirm('Yakin ingin menghapus data ini?')) {
                         axios.delete("{{ route('departments.destroy', ['department' => '__ID__']) }}".replace('__ID__', id))
                             .then(response => {
-                                window.dispatchEvent(new CustomEvent('department-saved'));
+                                window.dispatchEvent(new CustomEvent('departments-saved'));
                                 alert(response.data.message || 'Data berhasil dihapus.');
                             })
                             .catch(error => {
